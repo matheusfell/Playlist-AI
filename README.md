@@ -1,103 +1,173 @@
-# 🎧 PlaylistAi
+﻿# PlaylistAi
 
-Gera playlists no Spotify a partir de um prompt (cantores, gêneros, clima…) usando um modelo de IA do OpenRouter para escolher as músicas e a API do Spotify para criar a playlist na sua conta.
+Gere playlists no Spotify a partir de um prompt em linguagem natural. O app usa um modelo de IA via OpenRouter para sugerir musicas, busca as faixas no Spotify e cria a playlist diretamente na sua conta.
+
+![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=flat&logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express-4.x-000000?style=flat&logo=express&logoColor=white)
+![Spotify](https://img.shields.io/badge/Spotify-Web%20API-1DB954?style=flat&logo=spotify&logoColor=white)
+![OpenRouter](https://img.shields.io/badge/OpenRouter-IA-2563EB?style=flat)
+
+## Preview
+
+Tela de login com Spotify:
+
+![Tela de login do PlaylistAi](docs/screenshot-login.png)
+
+Tela principal para gerar playlists:
+
+![Tela principal do PlaylistAi](docs/screenshot-app.png)
+
+## Funcionalidades
+
+- Login com Spotify via OAuth.
+- Geracao de sugestoes de musicas a partir de um prompt.
+- Busca automatica das faixas no Spotify.
+- Criacao da playlist na conta autenticada.
+- Configuracao simples por variaveis de ambiente.
 
 ## Como funciona
 
-1. Você faz login com o Spotify (OAuth).
-2. Digita um prompt, ex: _"rock nacional dos anos 80 pra viajar de carro"_.
-3. Um modelo do **OpenRouter** sugere uma lista de músicas.
-4. O app procura cada música no **Spotify** e cria a playlist na sua conta.
+1. Voce faz login com sua conta Spotify.
+2. Digita um prompt, por exemplo: `rock nacional dos anos 80 pra viajar de carro`.
+3. O OpenRouter retorna uma lista de musicas coerente com o pedido.
+4. O servidor procura essas faixas no Spotify.
+5. A playlist e criada automaticamente na sua conta.
+
+## Tecnologias
+
+- Node.js
+- Express
+- Express Session
+- Spotify Web API
+- OpenRouter API
+- HTML, CSS e JavaScript puro no frontend
 
 ## Estrutura
 
-```
+```text
 PlaylistAi/
-├── server.js          # Servidor Express + OAuth + rota /api/gerar
-├── src/
-│   ├── ai.js          # Geração das músicas via OpenRouter
-│   └── spotify.js     # Login, busca e criação de playlist no Spotify
-├── public/            # Frontend (HTML, CSS, JS)
-├── .env.example       # Modelo das variáveis de ambiente
-└── package.json
+|-- docs/               # Prints usados no README
+|-- public/             # Frontend estatico
+|   |-- app.js
+|   |-- index.html
+|   `-- styles.css
+|-- src/
+|   |-- ai.js           # Geracao das musicas via OpenRouter
+|   `-- spotify.js      # OAuth, busca e criacao de playlist no Spotify
+|-- .env.example        # Modelo das variaveis de ambiente
+|-- package.json
+`-- server.js           # Servidor Express e rotas da aplicacao
 ```
 
-## Instalação
+## Requisitos
+
+- Node.js 18 ou superior
+- Conta no Spotify
+- App criado no Spotify Developer Dashboard
+- Chave de API do OpenRouter
+
+## Instalacao
+
+Clone o repositorio e instale as dependencias:
 
 ```bash
 npm install
-cp .env.example .env   # no Windows/PowerShell: copy .env.example .env
 ```
 
-Depois preencha o `.env` (veja o passo a passo abaixo) e rode:
+Crie o arquivo `.env` a partir do exemplo:
 
 ```bash
-npm start        # ou: npm run dev  (reinicia sozinho ao salvar)
+cp .env.example .env
 ```
 
-Acesse **http://127.0.0.1:3000**
+No Windows PowerShell:
 
----
+```powershell
+copy .env.example .env
+```
 
-## Passo a passo — configurar a API do Spotify
+Depois preencha as variaveis do `.env` e rode o projeto:
 
-1. Acesse **https://developer.spotify.com/dashboard** e faça login.
-2. Clique em **Create app**.
-3. Preencha:
-   - **App name**: PlaylistAi (ou o nome que quiser)
-   - **App description**: qualquer coisa
-   - **Redirect URI**: `http://127.0.0.1:3000/callback`
-     ⚠️ Precisa ser **idêntico** ao valor de `SPOTIFY_REDIRECT_URI` no `.env`.
-     Clique em **Add** depois de digitar.
-   - Em **Which API/SDKs are you planning to use?** marque **Web API**.
-4. Aceite os termos e clique em **Save**.
-5. Abra o app criado → **Settings**. Copie:
-   - **Client ID** → cole em `SPOTIFY_CLIENT_ID`
-   - **Client secret** (clique em _View client secret_) → cole em `SPOTIFY_CLIENT_SECRET`
-6. **Modo de desenvolvimento**: por padrão só você (dono do app) consegue logar.
-   Para liberar outras pessoas, vá em **User Management** e adicione o e-mail/nome
-   Spotify delas — ou solicite _Extended Quota Mode_ para uso público.
+```bash
+npm start
+```
 
-> Observação sobre o Redirect URI: o Spotify **não aceita mais `localhost`**, use
-> `http://127.0.0.1:3000/callback`. Se um dia publicar o site, adicione também a URL
-> `https://seudominio.com/callback` no dashboard e no `.env`.
+Para desenvolvimento, com reinicio automatico ao salvar:
 
-## Passo a passo — configurar o OpenRouter
+```bash
+npm run dev
+```
 
-1. Acesse **https://openrouter.ai** e faça login (Google/GitHub).
-2. Vá em **Keys** (https://openrouter.ai/keys) → **Create Key**.
-3. Copie a chave (começa com `sk-or-...`) e cole em `OPENROUTER_API_KEY` no `.env`.
-4. Escolha um modelo **gratuito** (terminam em `:free`) na lista
-   https://openrouter.ai/models?max_price=0 e coloque o ID em `OPENROUTER_MODEL`.
-   Sugestão: `meta-llama/llama-3.3-70b-instruct:free`.
+Acesse:
 
-> Para os modelos gratuitos **não é preciso cadastrar cartão**. O tier grátis tem
-> limite de requisições (~20/min e um teto diário); para gerar playlists de vez em
-> quando é de sobra. Se um modelo `:free` estiver indisponível, é só trocar o
-> `OPENROUTER_MODEL` por outro da lista.
+```text
+http://127.0.0.1:3000
+```
 
-## O arquivo `.env`
+## Variaveis de ambiente
 
 ```env
-SPOTIFY_CLIENT_ID=...
-SPOTIFY_CLIENT_SECRET=...
+SPOTIFY_CLIENT_ID=
+SPOTIFY_CLIENT_SECRET=
 SPOTIFY_REDIRECT_URI=http://127.0.0.1:3000/callback
 
 OPENROUTER_API_KEY=sk-or-...
 OPENROUTER_MODEL=meta-llama/llama-3.3-70b-instruct:free
 
 PORT=3000
-SESSION_SECRET=uma_string_aleatoria_longa
+SESSION_SECRET=troque_por_uma_string_aleatoria_longa
 ```
+
+## Configurando o Spotify
+
+1. Acesse [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) e faca login.
+2. Clique em **Create app**.
+3. Preencha os dados basicos do app.
+4. Em **Redirect URI**, adicione:
+
+```text
+http://127.0.0.1:3000/callback
+```
+
+5. Marque **Web API** em **Which API/SDKs are you planning to use?**.
+6. Salve o app.
+7. Abra **Settings** e copie:
+   - **Client ID** para `SPOTIFY_CLIENT_ID`
+   - **Client secret** para `SPOTIFY_CLIENT_SECRET`
+
+O Redirect URI cadastrado no Spotify precisa ser exatamente igual ao valor de `SPOTIFY_REDIRECT_URI` no `.env`.
+
+Por padrao, apps em modo de desenvolvimento permitem login apenas do dono do app e de usuarios adicionados em **User Management**.
+
+## Configurando o OpenRouter
+
+1. Acesse [OpenRouter](https://openrouter.ai) e faca login.
+2. Va em [Keys](https://openrouter.ai/keys).
+3. Clique em **Create Key**.
+4. Copie a chave e cole em `OPENROUTER_API_KEY`.
+5. Escolha um modelo gratuito em [OpenRouter Models](https://openrouter.ai/models?max_price=0).
+6. Coloque o ID do modelo em `OPENROUTER_MODEL`.
+
+Exemplo:
+
+```env
+OPENROUTER_MODEL=meta-llama/llama-3.3-70b-instruct:free
+```
+
+Modelos gratuitos geralmente terminam com `:free` e podem ter limite de requisicoes. Se um modelo ficar indisponivel, troque o valor de `OPENROUTER_MODEL` por outro modelo gratuito.
 
 ## Problemas comuns
 
-| Erro | Causa provável |
-|------|----------------|
-| `INVALID_CLIENT: Invalid redirect URI` | O Redirect URI no dashboard ≠ do `.env`. |
-| `state_invalido` no callback | Cookies bloqueados ou sessão expirada; tente de novo. |
-| Login falha para outra pessoa | Adicione o usuário em **User Management** no dashboard. |
-| `401` ao gerar | Sessão do Spotify expirou; faça login novamente. |
-| Erro `401` do OpenRouter | `OPENROUTER_API_KEY` inválida ou ausente. |
-| Erro `429` / rate limit | Limite do tier gratuito atingido; espere ou troque o modelo. |
-| `404` de modelo | ID em `OPENROUTER_MODEL` errado ou modelo `:free` fora do ar. |
+| Erro | Causa provavel |
+| --- | --- |
+| `INVALID_CLIENT: Invalid redirect URI` | O Redirect URI do Spotify esta diferente do `.env`. |
+| `state_invalido` no callback | Cookies bloqueados ou sessao expirada. Tente logar novamente. |
+| Login falha para outra pessoa | Adicione o usuario em **User Management** no dashboard do Spotify. |
+| `401` ao gerar playlist | Sessao do Spotify expirada. Faca login novamente. |
+| `401` do OpenRouter | `OPENROUTER_API_KEY` invalida ou ausente. |
+| `429` / rate limit | Limite do plano gratuito atingido. Aguarde ou troque o modelo. |
+| `404` de modelo | ID em `OPENROUTER_MODEL` errado ou modelo indisponivel. |
+
+## Licenca
+
+Este projeto ainda nao possui uma licenca definida.
