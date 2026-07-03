@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>playlistai — zsh</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="terminal">
+      <!-- Barra de título estilo macOS -->
+      <div class="titlebar">
+        <div class="dots">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+        </div>
+        <div class="title">matheus@playlistai — zsh — 96×32</div>
+        <div class="titlebar-right">
+          <button id="btn-logout" class="link hidden">logout</button>
+        </div>
+      </div>
+
+      <!-- Corpo do terminal -->
+      <div class="screen" id="screen">
+        <pre class="ascii">
+ ██████╗ ██╗      █████╗ ██╗   ██╗██╗     ██╗███████╗████████╗ █████╗ ██╗
+ ██╔══██╗██║     ██╔══██╗╚██╗ ██╔╝██║     ██║██╔════╝╚══██╔══╝██╔══██╗██║
+ ██████╔╝██║     ███████║ ╚████╔╝ ██║     ██║███████╗   ██║   ███████║██║
+ ██╔═══╝ ██║     ██╔══██║  ╚██╔╝  ██║     ██║╚════██║   ██║   ██╔══██║██║
+ ██║     ███████╗██║  ██║   ██║   ███████╗██║███████║   ██║   ██║  ██║██║
+ ╚═╝     ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝</pre>
+        <div class="boot">
+          <span class="muted"># playlists geradas por IA, exportadas direto pro Spotify</span>
+        </div>
+
+        <!-- Estado: não logado -->
+        <section id="area-login" class="block hidden">
+          <p><span class="prompt">$</span> auth --status</p>
+          <p class="out err-line">✗ não autenticado — conecte sua conta do Spotify</p>
+          <a class="cmd-btn" href="/login">
+            <span class="prompt">$</span> spotify login
+          </a>
+        </section>
+
+        <!-- Estado: logado -->
+        <section id="area-app" class="block hidden">
+          <p class="out ok-line">
+            ✓ autenticado como <strong id="usuario-nome"></strong>
+          </p>
+
+          <div class="field">
+            <label for="prompt"
+              ><span class="prompt">$</span> playlist gerar --prompt</label
+            >
+            <textarea
+              id="prompt"
+              rows="2"
+              spellcheck="false"
+              placeholder="rock nacional dos anos 80 pra viajar de carro..."
+            ></textarea>
+          </div>
+
+          <div class="field inline">
+            <label for="quantidade"
+              ><span class="prompt">$</span> --qtd</label
+            >
+            <input id="quantidade" type="number" min="1" max="50" value="20" />
+            <span class="muted">músicas (1–50)</span>
+          </div>
+
+          <button id="btn-gerar" class="run-btn">▸ executar</button>
+        </section>
+
+        <!-- Saída / logs -->
+        <section id="area-status" class="block hidden"></section>
+        <section id="area-resultado" class="block hidden"></section>
+
+        <div class="cursor-line">
+          <span class="prompt">$</span><span class="caret"></span>
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
