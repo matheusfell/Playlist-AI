@@ -1,54 +1,52 @@
-const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-const MODEL =
-  process.env.OPENROUTER_MODEL || "meta-llama/llama-3.3-70b-instruct:free";
+const OLLAMA_URL =
+  (process.env.OLLAMA_URL || "http://127.0.0.1:11434") + "/api/chat";
+const MODEL = process.env.OLLAMA_MODEL || "llama3.2:3b";
 
 /**
  * Recebe um prompt em linguagem natural (cantores, gêneros, clima, etc.)
- * e devolve uma lista de músicas [{ artist, title }] usando um modelo do OpenRouter.
+ * e devolve uma lista de músicas [{ artist, title }] usando um modelo local via Ollama.
  */
 export async function gerarMusicas(prompt, quantidade = 20) {
-  if (!process.env.OPENROUTER_API_KEY) {
-    throw new Error("OPENROUTER_API_KEY não configurada no .env");
-  }
-
   const qtd = Math.min(Math.max(Number(quantidade) || 20, 1), 50);
 
-  const resp = await fetch(OPENROUTER_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-      "Content-Type": "application/json",
-      // Opcionais, mas recomendados pelo OpenRouter (aparecem no ranking do app):
-      "HTTP-Referer": "http://127.0.0.1:3000",
-      "X-Title": "PlaylistAi",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content:
-            "Você é um curador musical especialista. A partir do pedido do usuário, " +
-            "monte uma playlist coerente. Responda APENAS com um JSON válido, sem texto " +
-            "extra e sem markdown, no formato: " +
-            '{"nome":"<nome criativo para a playlist>","musicas":[{"artist":"<artista>","title":"<música>"}]}. ' +
-            "Use músicas reais e existentes. Não repita músicas.",
-        },
-        {
-          role: "user",
-          content: `Monte uma playlist com ${qtd} músicas para o seguinte pedido: "${prompt}"`,
-        },
-      ],
-    }),
-  });
+  let resp;
+  try {
+    resp = await fetch(OLLAMA_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: MODEL,
+        stream: false,
+        format: "json",
+        messages: [
+          {
+            role: "system",
+            content:
+              "Você é um curador musical especialista. A partir do pedido do usuário, " +
+              "monte uma playlist coerente. Responda APENAS com um JSON válido, sem texto " +
+              "extra e sem markdown, no formato: " +
+              '{"nome":"<nome criativo para a playlist>","musicas":[{"artist":"<artista>","title":"<música>"}]}. ' +
+              "Use músicas reais e existentes. Não repita músicas.",
+          },
+          {
+            role: "user",
+            content: `Monte uma playlist com ${qtd} músicas para o seguinte pedido: "${prompt}"`,
+          },
+        ],
+      }),
+    });
+  } catch {
+    throw new Error(
+      "Não foi possível conectar ao Ollama. Verifique se ele está rodando (ollama serve)."
+    );
+  }
 
   if (!resp.ok) {
-    throw new Error(`Erro no OpenRouter (${resp.status}): ${await resp.text()}`);
+    throw new Error(`Erro no Ollama (${resp.status}): ${await resp.text()}`);
   }
 
   const data = await resp.json();
-  const texto = data?.choices?.[0]?.message?.content?.trim();
+  const texto = data?.message?.content?.trim();
 
   if (!texto) {
     throw new Error("O modelo não retornou nenhuma resposta.");

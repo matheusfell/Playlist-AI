@@ -107,7 +107,6 @@ app.post("/api/gerar", async (req, res) => {
     // 3.3 Cria a playlist e adiciona as faixas
     const playlist = await spotify.criarPlaylist(
       token,
-      req.session.userId,
       nome,
       `Gerada por IA a partir de: "${prompt}"`
     );

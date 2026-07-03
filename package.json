@@ -1,7 +1,7 @@
 {
   "name": "playlist-ai",
   "version": "1.0.0",
-  "description": "Gera playlists no Spotify a partir de um prompt usando IA via OpenRouter",
+  "description": "Gera playlists no Spotify a partir de um prompt usando IA local via Ollama",
   "type": "module",
   "main": "server.js",
   "scripts": {

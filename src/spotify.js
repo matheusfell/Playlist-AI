@@ -73,7 +73,9 @@ async function api(token, caminho, opcoes = {}) {
     },
   });
   if (!resp.ok) {
-    throw new Error(`Erro na API do Spotify (${resp.status}): ${await resp.text()}`);
+    throw new Error(
+      `Erro na API do Spotify em ${caminho} (${resp.status}): ${await resp.text()}`
+    );
   }
   return resp.status === 204 ? null : resp.json();
 }
@@ -98,9 +100,9 @@ export async function buscarMusica(token, artist, title) {
   return item ? { uri: item.uri, nome: item.name, artista: item.artists[0]?.name } : null;
 }
 
-/** Cria uma playlist na conta do usuário. */
-export async function criarPlaylist(token, userId, nome, descricao) {
-  return api(token, `/users/${userId}/playlists`, {
+/** Cria uma playlist na conta do usuário logado. */
+export async function criarPlaylist(token, nome, descricao) {
+  return api(token, `/me/playlists`, {
     method: "POST",
     body: JSON.stringify({ name: nome, description: descricao, public: false }),
   });
@@ -109,7 +111,7 @@ export async function criarPlaylist(token, userId, nome, descricao) {
 /** Adiciona faixas (em lotes de 100) à playlist. */
 export async function adicionarFaixas(token, playlistId, uris) {
   for (let i = 0; i < uris.length; i += 100) {
-    await api(token, `/playlists/${playlistId}/tracks`, {
+    await api(token, `/playlists/${playlistId}/items`, {
       method: "POST",
       body: JSON.stringify({ uris: uris.slice(i, i + 100) }),
     });

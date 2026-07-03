@@ -1,11 +1,11 @@
 ﻿# PlaylistAi
 
-Gere playlists no Spotify a partir de um prompt em linguagem natural. O app usa um modelo de IA via OpenRouter para sugerir musicas, busca as faixas no Spotify e cria a playlist diretamente na sua conta.
+Gere playlists no Spotify a partir de um prompt em linguagem natural. O app usa um modelo de IA local via Ollama para sugerir musicas, busca as faixas no Spotify e cria a playlist diretamente na sua conta.
 
 ![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=flat&logo=node.js&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-4.x-000000?style=flat&logo=express&logoColor=white)
 ![Spotify](https://img.shields.io/badge/Spotify-Web%20API-1DB954?style=flat&logo=spotify&logoColor=white)
-![OpenRouter](https://img.shields.io/badge/OpenRouter-IA-2563EB?style=flat)
+![Ollama](https://img.shields.io/badge/Ollama-IA%20Local-000000?style=flat)
 
 ## Preview
 
@@ -29,7 +29,7 @@ Tela principal para gerar playlists:
 
 1. Voce faz login com sua conta Spotify.
 2. Digita um prompt, por exemplo: `rock nacional dos anos 80 pra viajar de carro`.
-3. O OpenRouter retorna uma lista de musicas coerente com o pedido.
+3. O Ollama (rodando localmente) retorna uma lista de musicas coerente com o pedido.
 4. O servidor procura essas faixas no Spotify.
 5. A playlist e criada automaticamente na sua conta.
 
@@ -39,7 +39,7 @@ Tela principal para gerar playlists:
 - Express
 - Express Session
 - Spotify Web API
-- OpenRouter API
+- Ollama (IA local)
 - HTML, CSS e JavaScript puro no frontend
 
 ## Estrutura
@@ -52,7 +52,7 @@ PlaylistAi/
 |   |-- index.html
 |   `-- styles.css
 |-- src/
-|   |-- ai.js           # Geracao das musicas via OpenRouter
+|   |-- ai.js           # Geracao das musicas via Ollama (IA local)
 |   `-- spotify.js      # OAuth, busca e criacao de playlist no Spotify
 |-- .env.example        # Modelo das variaveis de ambiente
 |-- package.json
@@ -64,7 +64,7 @@ PlaylistAi/
 - Node.js 18 ou superior
 - Conta no Spotify
 - App criado no Spotify Developer Dashboard
-- Chave de API do OpenRouter
+- Ollama instalado e rodando localmente ([ollama.com](https://ollama.com))
 
 ## Instalacao
 
@@ -111,8 +111,8 @@ SPOTIFY_CLIENT_ID=
 SPOTIFY_CLIENT_SECRET=
 SPOTIFY_REDIRECT_URI=http://127.0.0.1:3000/callback
 
-OPENROUTER_API_KEY=sk-or-...
-OPENROUTER_MODEL=meta-llama/llama-3.3-70b-instruct:free
+OLLAMA_URL=http://127.0.0.1:11434
+OLLAMA_MODEL=llama3.2:3b
 
 PORT=3000
 SESSION_SECRET=troque_por_uma_string_aleatoria_longa
@@ -139,22 +139,26 @@ O Redirect URI cadastrado no Spotify precisa ser exatamente igual ao valor de `S
 
 Por padrao, apps em modo de desenvolvimento permitem login apenas do dono do app e de usuarios adicionados em **User Management**.
 
-## Configurando o OpenRouter
+## Configurando o Ollama
 
-1. Acesse [OpenRouter](https://openrouter.ai) e faca login.
-2. Va em [Keys](https://openrouter.ai/keys).
-3. Clique em **Create Key**.
-4. Copie a chave e cole em `OPENROUTER_API_KEY`.
-5. Escolha um modelo gratuito em [OpenRouter Models](https://openrouter.ai/models?max_price=0).
-6. Coloque o ID do modelo em `OPENROUTER_MODEL`.
+1. Instale o Ollama em [ollama.com](https://ollama.com) (ou via `winget install Ollama.Ollama` no Windows).
+2. Baixe o modelo que sera usado:
+
+```bash
+ollama pull llama3.2:3b
+```
+
+3. Garanta que o servico esta rodando (o instalador do Windows ja inicia automaticamente; para checar/iniciar manualmente use `ollama serve`).
+4. Ajuste `OLLAMA_URL` e `OLLAMA_MODEL` no `.env` se quiser usar outro host/modelo.
 
 Exemplo:
 
 ```env
-OPENROUTER_MODEL=meta-llama/llama-3.3-70b-instruct:free
+OLLAMA_URL=http://127.0.0.1:11434
+OLLAMA_MODEL=llama3.2:3b
 ```
 
-Modelos gratuitos geralmente terminam com `:free` e podem ter limite de requisicoes. Se um modelo ficar indisponivel, troque o valor de `OPENROUTER_MODEL` por outro modelo gratuito.
+Outros modelos podem ser usados, como `llama3.1:8b` ou `mistral:7b` — basta baixar com `ollama pull <modelo>` e atualizar `OLLAMA_MODEL`.
 
 ## Problemas comuns
 
@@ -164,9 +168,8 @@ Modelos gratuitos geralmente terminam com `:free` e podem ter limite de requisic
 | `state_invalido` no callback | Cookies bloqueados ou sessao expirada. Tente logar novamente. |
 | Login falha para outra pessoa | Adicione o usuario em **User Management** no dashboard do Spotify. |
 | `401` ao gerar playlist | Sessao do Spotify expirada. Faca login novamente. |
-| `401` do OpenRouter | `OPENROUTER_API_KEY` invalida ou ausente. |
-| `429` / rate limit | Limite do plano gratuito atingido. Aguarde ou troque o modelo. |
-| `404` de modelo | ID em `OPENROUTER_MODEL` errado ou modelo indisponivel. |
+| Erro ao conectar ao Ollama | O servico do Ollama nao esta rodando. Rode `ollama serve` ou abra o app Ollama. |
+| Resposta lenta ou modelo nao encontrado | Rode `ollama pull <modelo>` para baixar o modelo configurado em `OLLAMA_MODEL`. |
 
 ## Licenca
 
